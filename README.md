@@ -14,7 +14,8 @@ MavensMate is a TextMate bundle that aims to replicate the functionality of the 
 ##Clean Install
 (If you have installed XCode 4 via the App Store, you will need to install the <a href="https://github.com/kennethreitz/osx-gcc-installer">GCC development tools</a> before proceeding.)
 
-```$ sudo gem install builder
+```
+$ sudo gem install builder
 $ sudo gem install savon
 $ sudo gem install rubyzip
 ```
