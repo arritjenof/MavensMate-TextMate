@@ -15,6 +15,51 @@ module MavensMate
       
       include MetadataHelper
       
+      #updates package xml based on the current contents of the file system
+      def update_package_xml
+        project_package = Nokogiri::XML(File.open("#{ENV['TM_PROJECT_DIRECTORY']}/src/package.xml"))
+        project_package.remove_namespaces!
+        project_package.xpath("//types/name").each do |node| 
+           if CORE_METADATA_TYPES.include?(node.text) && node.previous_element.text != "*"
+               meta_type = get_meta_type_by_name(node.text)                
+               node.parent.children.each do |n|
+                 n.remove if n.name == "members"
+               end
+               Dir.foreach("#{ENV['TM_PROJECT_DIRECTORY']}/src/#{meta_type[:directory_name]}") do |entry|    
+                 next if entry == "." or entry == ".." or entry.include? "-meta"
+                 entry = entry.split(".")[0]
+                 node.add_previous_sibling("\t\t<members>#{entry}</members>\n")
+               end
+               node.add_previous_sibling("\t\t")
+               node.parent.children.each_with_index do |n, i|
+                 next if i == 0
+                 break if n.name != "text"  
+                 n.remove
+               end
+           end
+        end
+        File.open("#{ENV['TM_PROJECT_DIRECTORY']}/src/package.xml", 'w') {|f| f.write(project_package.to_xml) }
+      end
+      
+      def update_org_index(type, name)
+        begin
+          if File.exists("#{ENV['TM_PROJECT_DIRECTORY']}/config/.org_metadata")
+            project_array = eval(File.read("#{ENV['TM_PROJECT_DIRECTORY']}/config/.org_metadata"))
+            metadata_type = project_array.detect {|f| f[:title] == type }
+            metadata_type[:children].push({
+              :title=>name, 
+              :key=>name, 
+              :isLazy=>false, 
+              :isFolder=>false, 
+              :children=>[], 
+              :selected=>false
+            }) 
+          end 
+        rescue Exception => e
+          
+        end 
+      end
+      
       #puts settings.yaml in the project config directory
       def put_project_config(username, project_name, server_url)
         project_folder = ENV['FM_PROJECT_FOLDER']
