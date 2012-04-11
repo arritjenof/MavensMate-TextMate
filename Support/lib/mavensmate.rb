@@ -474,12 +474,21 @@ module MavensMate
         client = MavensMate::Client.new
         zip_file = client.retrieve({ :package => "#{tmp_dir}/package.xml" })
                         
+        if params[:package_type] == "Custom"
+          hash = params[:package]
+          deploy = true
+          MavensMate::FileFactory.put_package(tmp_dir, binding, false)
+          zip_file = client.retrieve({ :package => "#{tmp_dir}/package.xml" })
+        else
+          zip_file = client.retrieve({ :package => "#{ENV['TM_PROJECT_DIRECTORY']}/changesets/#{params[:changeset]}/unpackaged/package.xml" })
+        end               
         client = MavensMate::Client.new({ :username => params[:un], :password => params[:pw], :endpoint => endpoint })
         result = client.deploy({
           :zip_file => zip_file,
           :deploy_options => "<checkOnly>#{params[:check_only]}</checkOnly><rollbackOnError>true</rollbackOnError>"
         })
         MavensMate::FileFactory.remove_directory(tmp_dir)
+        MavensMate::FileFactory.remove_directory(tmp_dir) unless params[:package_type] != "Custom"
         return result
       else
         puts '<div id="mm_logger">'
@@ -492,12 +501,21 @@ module MavensMate
           client = MavensMate::Client.new
           zip_file = client.retrieve({ :package => "#{tmp_dir}/package.xml" })
                           
+          if params[:package_type] == "Custom"
+            hash = params[:package]
+            deploy = true
+            MavensMate::FileFactory.put_package(tmp_dir, binding, false)
+            zip_file = client.retrieve({ :package => "#{tmp_dir}/package.xml" })
+          else
+            zip_file = client.retrieve({ :package => "#{ENV['TM_PROJECT_DIRECTORY']}/changesets/#{params[:changeset]}/unpackaged/package.xml" })
+          end                
           client = MavensMate::Client.new({ :username => params[:un], :password => params[:pw], :endpoint => endpoint })
           result = client.deploy({
             :zip_file => zip_file,
             :deploy_options => "<checkOnly>#{params[:check_only]}</checkOnly><rollbackOnError>true</rollbackOnError>"
           })
           MavensMate::FileFactory.remove_directory(tmp_dir)
+          MavensMate::FileFactory.remove_directory(tmp_dir) unless params[:package_type] != "Custom"
           puts "</div>"
           return result
         end  

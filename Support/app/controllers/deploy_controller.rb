@@ -35,11 +35,19 @@ class DeployController < ApplicationController
       end 
     rescue Exception => e
       #no connections
-    end 
+    end
+    
+    changesets = []
+    if File.directory?("#{ENV['TM_PROJECT_DIRECTORY']}/changesets")
+      Dir.foreach("#{ENV['TM_PROJECT_DIRECTORY']}/changesets") do |c|
+        next if c == "." or c == ".."
+        changesets.push(c)
+      end                                                            
+    end
     
     MavensMate.build_index if confirmed
     meta_array = eval(File.read("#{ENV['TM_PROJECT_DIRECTORY']}/config/.org_metadata")) #=> comprehensive list of server metadata    
-    render "_deploy", :locals => { :meta_array => meta_array, :child_metadata_definition => CHILD_META_DICTIONARY, :connections => connections }
+    render "_deploy", :locals => { :meta_array => meta_array, :child_metadata_definition => CHILD_META_DICTIONARY, :connections => connections, :changesets => changesets }
   end
   
   #deploys metadata to selected server
@@ -61,11 +69,11 @@ class DeployController < ApplicationController
           require 'erb'
           template = ERB.new File.new("#{ENV['TM_BUNDLE_SUPPORT']}/app/views/deploy/_async_deploy_result.html.erb").read, nil, "-"
           erb = template.result(binding)        
-          src = File.new("#{ENV['TM_PROJECT_DIRECTORY']}/config/.async_deploy_result", "w")
+          src = File.new("#{ENV['TM_PROJECT_DIRECTORY']}/config/.async_deploy_result.html", "w")
           src.puts(erb)
           src.close
           MavensMate.close_deploy_window          
-          `open "#{ENV['TM_PROJECT_DIRECTORY']}/config/.async_deploy_result"`        
+          `open "#{ENV['TM_PROJECT_DIRECTORY']}/config/.async_deploy_result.html"`        
         rescue Exception => e
           TextMate::UI.alert(:warning, "MavensMate", e.message + "\n" + e.backtrace.join("\n"))  
         end  

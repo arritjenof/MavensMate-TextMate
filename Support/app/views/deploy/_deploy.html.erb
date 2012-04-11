@@ -126,6 +126,39 @@
 		</style>
 				
 		<div id="metadata">
+			
+			<form class="form-stacked" style="padding-left:15px;margin-bottom:5px;">
+			 	<fieldset>
+			   		<div class="clearfix">
+						<label for="ptype">Package Type</label> 
+						<select id="ptype">
+							<option>Custom</option>
+							<option>Changeset</option>
+						</select>
+					</div> 
+					<div class="clearfix" id="changesetwrapper" style="display:none">
+						<label for="cset">Changeset</label> 
+						<select id="cset">
+							<% changesets.each do |c| %>
+								<option><%= c %></option>
+							<% end %>
+						</select>
+					</div>   			
+				</fieldset>	
+			</form>
+			
+			<script>
+				$("#ptype").change(function() {
+					if (this.value == "Custom") {
+						$("#project_wrapper").show();
+						$("#changesetwrapper").hide();
+					} else {
+						$("#project_wrapper").hide();
+						$("#changesetwrapper").show();
+					}
+				})
+			</script>
+			
 			<div id="project_wrapper">
 				
 				<div id="filter">
@@ -283,7 +316,9 @@
 			    server_url: $("#server_url").val(),
 			    check_only: isValidateOnly(),
 				mode: deploy_mode,
-			    tree: get_tree()  
+			    tree: get_tree(),
+				package_type: $("#ptype").val(),
+			  	changeset: $("#cset").val()
 			})
 		);  
 	} 
@@ -310,7 +345,11 @@
 				    resizeWindowAfterResult();
 				}
 			}
-		);
+		); 
+		
+		// $("#un").val($("#un_list").val());
+		// $("#pw").val(pw_def[this.value]);
+		// $("#server_url").val(surl_def[this.value]);  
 		
 		$("#check_only").change(function() {
 			if (!this.checked) {
@@ -363,7 +402,8 @@
 
 	    $("#txtFilter")
 	    .change(function() {
-	        var filter = $(this).val();
+	        var filter = $(this).val(); 
+			//if (filter.length < 3) return false;
 	        // if (filter) {
 	        //     // this finds all links in a list that contain the input,
 	        //     // and hide the ones not containing the input while showing the ones that do
@@ -395,27 +435,40 @@
 	        node.expand(false);
 	    });  
 		
+		var rootNode = $("#tree").dynatree("getRoot");
+		
 		function filter_tree(searchTerm) {
-			searchTerm = searchTerm.toLowerCase();
-			//var startNode = targetNode ||  $("#tree").dynatree("getRoot");
-			var startNode = $("#tree").dynatree("getRoot");
-			startNode.visit(function(node) {          
-				if (node.isVisible() && node.data.title) {              
+			var regex = new RegExp(searchTerm,"i");
+			rootNode.visit(function(node) {          
+			    if (node.isVisible() && node.data.title) {              
 					// Filter currently visible non-root nodes.              
-					nodeTitleLower = node.data.title.toLowerCase();
 					nodeTitle = node.data.title;
-					if (nodeTitle.indexOf(searchTerm) >= 0 || nodeTitleLower.indexOf(searchTerm) >= 0) {                 
-						 // Make sure we and all our parents are visible                  
+
+					if ( nodeTitle.match(regex) ) {
+	              		// Make sure we and all our parents are visible                  
 						node.visitParents(function(node) {                      
 							$(node.li).show();                      
 							return (node.parent != null);                  
 						}, true); 
 			            // Terminate the traversal of this branch since the node matches
-						return 'skip';              
-					} else {                  
-						// Hide the node.                  
-						$(node.li).hide();              
-					}
+						return 'skip';  
+		            } else {
+		                $(node.li).hide();
+		            }   
+					
+					
+			// 		if (nodeTitle.indexOf(searchTerm) >= 0 || nodeTitleLower.indexOf(searchTerm) >= 0) {                 
+			// 			 // Make sure we and all our parents are visible                  
+			// 			node.visitParents(function(node) {                      
+			// 				$(node.li).show();                      
+			// 				return (node.parent != null);                  
+			// 			}, true); 
+			//             // Terminate the traversal of this branch since the node matches
+			// 			return 'skip';              
+			// 		} else {                  
+			// 			// Hide the node.                  
+			// 			$(node.li).hide();              
+			// 		}     
 				}
 			});
 		}
