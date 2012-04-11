@@ -169,22 +169,19 @@ module MavensMate
       end
       
       def replace_file(file_path, project_zip)
-        Dir.chdir(ENV['TM_PROJECT_DIRECTORY'])
-        File.open('metadata.zip', 'wb') {|f| f.write(Base64.decode64(project_zip))}
-        Zip::ZipFile.open('metadata.zip') { |zip_file|
+        File.open("#{ENV['TM_PROJECT_DIRECTORY']}/metadata.zip", 'wb') {|f| f.write(Base64.decode64(project_zip))}
+        Zip::ZipFile.open("#{ENV['TM_PROJECT_DIRECTORY']}/metadata.zip") { |zip_file|
            zip_file.each { |f|
              f_path=File.join(ENV['TM_PROJECT_DIRECTORY'], f.name)
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
            }
          }
-         Dir.chdir("#{ENV['TM_PROJECT_DIRECTORY']}/unpackaged")
          meta_type_ext = File.extname(file_path) #=> ".cls"
          meta_type_no_ext = meta_type_ext.gsub(".","")
          mt = get_meta_type_by_suffix(meta_type_no_ext)
          copy_to_dir = "#{ENV['TM_PROJECT_DIRECTORY']}/src/#{mt[:directory_name]}" #=> "/Users/username/Projects/myproject/src/classes"
-         %x{cp -r '#{Dir.getwd}/#{mt[:directory_name]}/' '#{copy_to_dir}'}
-         Dir.chdir("#{ENV['TM_PROJECT_DIRECTORY']}")
+         FileUtils.cp_r "#{ENV['TM_PROJECT_DIRECTORY']}/unpackaged/#{mt[:directory_name]}/.", "#{copy_to_dir}"
          FileUtils.rm_r "#{ENV['TM_PROJECT_DIRECTORY']}/unpackaged"
          FileUtils.rm_r "#{ENV['TM_PROJECT_DIRECTORY']}/metadata.zip"
       end
@@ -319,6 +316,14 @@ module MavensMate
       def put_tm_properties(project_directory)
         File.open("#{project_directory}/.tm_properties", 'w') {|f| f.write("projectDirectory     = \"$CWD\"") }
       end
+      
+      #removes files with the specified extension from a directory
+      def clean_directory(dir, extension="")
+        begin
+          FileUtils.rm Dir.glob("#{dir}/*#{extension}") if File.exist?(dir)
+        rescue
+        end
+      end
                   
       private
         
@@ -330,12 +335,7 @@ module MavensMate
             FileUtils.mv(file, destination + File.basename(file))
           }
         end
-        
-        #removes files with the specified extension from a directory
-        def clean_directory(dir, extension="")
-          FileUtils.rm Dir.glob("#{dir}/*#{extension}") if File.exist?(dir)
-        end
-                
+                        
         def cleanup_tmp
           FileUtils.rm_rf("#{Dir.tmpdir}/mmzip")
           Dir.mkdir("#{Dir.tmpdir}/mmzip")

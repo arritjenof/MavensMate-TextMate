@@ -123,7 +123,7 @@ class ProjectController < ApplicationController
       result = MavensMate.clean_project({ :update_sobjects => false, :update_package => true, :package => tree })
       render "_project_edit_result", :locals => { :message => result[:message], :success => result[:success] }
     rescue Exception => e
-      TextMate::UI.alert(:warning, "MavensMate", e.message)
+      TextMate::UI.alert(:warning, "MavensMate", e.message + "\n" + e.backtrace.join("\n"))
     end
   end
   
@@ -183,14 +183,14 @@ class ProjectController < ApplicationController
       params[:package] = tree
       result = MavensMate.new_project(params)
       return if result.nil?
-      kill_server unless ! result[:is_success]
+      kill_server unless ! result[:is_success] 
       MavensMate.close_all_html_windows unless ! result[:is_success]
       render "_project_new_result", :locals => { :message => result[:error_message], :success => result[:is_success] }
     rescue Exception => e
       TextMate::UI.alert(:warning, "MavensMate", e.message)
     end
   end
-    
+      
   #checks out project from SVN, associates Salesforce.com server credentials  
   def checkout
     begin

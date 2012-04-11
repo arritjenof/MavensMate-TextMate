@@ -26,7 +26,7 @@ module MavensMate
   #-use metadata filter ui in create project/changeset
   #-move all temporary processing to .org.mavens.mavensmate.random format
   #-refresh selected files from server   
-  #-modify package.xml when new metadata is created from MavensMate    
+  #-update .org_metadata when metadata is deleted/created from mavensmate??    
   #-create project from package 
   #-changeset -> deploy
   #-deploy -> save as changeset
@@ -257,7 +257,8 @@ module MavensMate
           return result
         else
           zip_file = MavensMate::FileFactory.put_local_metadata(:api_name => options[:api_name], :meta_type => options[:meta_type], :object_name => object_name, :apex_class_type => options[:apex_class_type])
-          TextMate.rescan_project    
+          FileFactory.update_package_xml   
+          TextMate.rescan_project 
           TextMate.go_to :file => ENV['TM_PROJECT_DIRECTORY'] + "/src/#{META_DIR_MAP[options[:meta_type]]}/#{options[:api_name]}#{META_EXT_MAP[options[:meta_type]]}" 
           return result
         end
@@ -279,8 +280,6 @@ module MavensMate
       TextMate.call_with_progress( 
         :title => "MavensMate", 
         :message => "Compiling #{compiling_what}",
-        :indeterminate => true ) do |dialog|                
-          zip_file = MavensMate::FileFactory.put_tmp_metadata(get_metadata_hash(active_file))     
         :indeterminate => true ) do |dialog|
           client = MavensMate::Client.new
           files_to_save = get_metadata_hash(active_file)
@@ -321,7 +320,6 @@ module MavensMate
         TextMate.rescan_project
       end
     rescue Exception => e
-      alert e.message
       alert e.message + "\n" + e.backtrace.join("\n")
     end
   end
@@ -348,6 +346,7 @@ module MavensMate
           get_selected_files.each do |f|
             FileUtils.rm_r f   
           end
+          FileFactory.update_package_xml
           TextMate.rescan_project
         end
       end
@@ -449,9 +448,9 @@ module MavensMate
         end 
       end
     rescue Exception => e
-      alert e.message
+      #alert e.message
+      alert e.message + "\n" + e.backtrace.join("\n")
       return { :success => false, :message => e.message }  
-      #alert e.message + "\n" + e.backtrace.join("\n")
     end   
   end
   
@@ -483,12 +482,7 @@ module MavensMate
       if params[:mode] == "async"
         endpoint = MavensMate::Util.get_sfdc_endpoint(params[:server_url])
         tmp_dir = MavensMate::FileFactory.put_tmp_directory
-        hash = params[:package]
-        deploy = true
-        MavensMate::FileFactory.put_package(tmp_dir, binding, false)
         client = MavensMate::Client.new
-        zip_file = client.retrieve({ :package => "#{tmp_dir}/package.xml" })
-                        
         if params[:package_type] == "Custom"
           hash = params[:package]
           deploy = true
@@ -502,7 +496,6 @@ module MavensMate
           :zip_file => zip_file,
           :deploy_options => "<checkOnly>#{params[:check_only]}</checkOnly><rollbackOnError>true</rollbackOnError>"
         })
-        MavensMate::FileFactory.remove_directory(tmp_dir)
         MavensMate::FileFactory.remove_directory(tmp_dir) unless params[:package_type] != "Custom"
         return result
       else
@@ -510,12 +503,7 @@ module MavensMate
         TextMate.call_with_progress( :title => "MavensMate", :message => "Deploying to the server") do
           endpoint = MavensMate::Util.get_sfdc_endpoint(params[:server_url])
           tmp_dir = MavensMate::FileFactory.put_tmp_directory
-          hash = params[:package]
-          deploy = true
-          MavensMate::FileFactory.put_package(tmp_dir, binding, false)
           client = MavensMate::Client.new
-          zip_file = client.retrieve({ :package => "#{tmp_dir}/package.xml" })
-                          
           if params[:package_type] == "Custom"
             hash = params[:package]
             deploy = true
@@ -529,7 +517,6 @@ module MavensMate
             :zip_file => zip_file,
             :deploy_options => "<checkOnly>#{params[:check_only]}</checkOnly><rollbackOnError>true</rollbackOnError>"
           })
-          MavensMate::FileFactory.remove_directory(tmp_dir)
           MavensMate::FileFactory.remove_directory(tmp_dir) unless params[:package_type] != "Custom"
           puts "</div>"
           return result
