@@ -15,7 +15,6 @@ module MavensMate
   class Client 
     
     include MetadataHelper
-    PACKAGE_TYPES = [ "ApexClass", "ApexComponent", "ApexPage", "ApexTrigger", "StaticResource" ]
     
     # sfdc username
     attr_accessor :username
@@ -219,7 +218,7 @@ module MavensMate
           :isFolder => true,
           :directory_name => object[:directory_name],
           :meta_type => object[:xml_name],
-          :select => PACKAGE_TYPES.include?(object[:xml_name]) ? true : false,
+          :select => CORE_METADATA_TYPES.include?(object[:xml_name]) ? true : false,
           :child_metadata => children,
           :has_child_metadata => ! children.nil?,
           :in_folder => object[:in_folder]
@@ -229,6 +228,42 @@ module MavensMate
       puts "\n\n\n\n\n"
       puts folders.to_json
       return folders.to_json
+    end
+    
+    #queries ApexClass, ApexTrigger, ApexPage, ApexComponent, StaticResource to determine
+    #whether server copy has been updated by a different user than the current
+    def has_server_conflict(files)
+      begin
+        files.each do |key, value|
+          next unless CORE_METADATA_TYPES.include?(key)
+          response = nil
+          filter = ""
+          value.each_with_index do |v, i|
+             filter << "Name = '#{v}'"  
+             filter << " OR " unless i == value.length - 1
+          end
+          puts filter
+          begin
+            response = self.pclient.request :query do |soap|
+              soap.header = get_soap_header
+              soap.body = { :queryString => "select count() from #{key} Where LastModifiedById != '#{self.user_id}' and (#{filter})" }
+            end
+          rescue Savon::SOAP::Fault => fault
+            raise Exception.new(fault.to_s)
+          end
+        
+          #puts "\n\nquery response: " + response.to_hash.inspect
+          if response[:query_response][:result][:size] == "0"
+            return false
+          else
+            return true
+          end
+          #query response: {:query_response=>{:result=>{:done=>true, :query_locator=>nil, :size=>"1", :"@xsi:type"=>"QueryResult"}}}          
+        end
+      rescue Exception => e
+        #puts "exception: " + e.message
+        return false
+      end
     end
     
     #list metadata for a specific type
@@ -490,7 +525,7 @@ module MavensMate
       			    types_body << "</types>"
       			}    			
           else #grab from default package
-            PACKAGE_TYPES.each { |type|  
+            CORE_METADATA_TYPES.each { |type|  
               types_body << "<types><members>*</members><name>"+type+"</name></types>"
             }
           end     

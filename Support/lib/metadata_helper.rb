@@ -1,6 +1,7 @@
 module MetadataHelper
   
   MM_API_VERSION = ENV['MM_API_VERSION'] || "24.0" 
+  CORE_METADATA_TYPES = [ "ApexClass", "ApexComponent", "ApexPage", "ApexTrigger", "StaticResource" ]  
   META_DICTIONARY = eval(File.read("#{ENV['TM_BUNDLE_SUPPORT']}/conf/metadata_dictionary"))
   CHILD_META_DICTIONARY = eval(File.read("#{ENV['TM_BUNDLE_SUPPORT']}/conf/metadata_children_dictionary"))
   

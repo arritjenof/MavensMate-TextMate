@@ -281,7 +281,21 @@ module MavensMate
         :message => "Compiling #{compiling_what}",
         :indeterminate => true ) do |dialog|                
           zip_file = MavensMate::FileFactory.put_tmp_metadata(get_metadata_hash(active_file))     
+        :indeterminate => true ) do |dialog|
           client = MavensMate::Client.new
+          files_to_save = get_metadata_hash(active_file)
+          
+          if client.has_server_conflict(files_to_save)          
+            confirmed = TextMate::UI.request_confirmation(
+              :title => "MavensMate",
+              :prompt => "One (or more) of the files you're attempting to compile has been updated by another Salesforce.com user since your last update",
+              :button1 => "That's OK, overwrite the server copy",
+              :button2 => "Nevermind")
+
+            return if ! confirmed  
+          end
+                          
+          zip_file = MavensMate::FileFactory.put_tmp_metadata(files_to_save)     
           result = client.deploy({:zip_file => zip_file, :deploy_options => "<rollbackOnError>true</rollbackOnError>"})            
         puts result.inspect
       end
@@ -308,6 +322,7 @@ module MavensMate
       end
     rescue Exception => e
       alert e.message
+      alert e.message + "\n" + e.backtrace.join("\n")
     end
   end
     
