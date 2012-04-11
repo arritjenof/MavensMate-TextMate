@@ -14,10 +14,7 @@ MavensMate is a TextMate bundle that aims to replicate the functionality of the 
 <P>
 <h2>Clean Install</h2>
 <p>(If you have installed XCode 4 via the App Store, you will need to install the <a href="https://github.com/kennethreitz/osx-gcc-installer">GCC development tools</a> before proceeding.)</p>
-<<<<<<< HEAD
 <p></p>
-=======
->>>>>>> updating readme
 ```
 $ sudo gem install rails
 $ sudo gem install builder
@@ -32,7 +29,7 @@ $ git clone git://github.com/joeferraro/MavensMate.git "MavensMate.tmbundle"
 $ osascript -e 'tell app "TextMate" to reload bundles'
 ```
 
-<p>Open TextMate, go to Preferences --> Advanced --> Shell Variables and add a Shell Variable called "FM_PROJECT_FOLDER" with the value being the location where you'd like your Salesforce.com projects to reside (for example: '/Users/joe/Projects') [*notice the absolute path*]</p> 
+<p>Open TextMate, go to Preferences --> Advanced --> Shell Variables and add a Shell Variable called "FM_PROJECT_FOLDER" with the value being the location where you'd like your Salesforce.com projects to reside (for example: '/Users/joe/Projects') [*notice the absolute path*]</p>
 ```
 /Users/username/development/projects
 ```
@@ -51,8 +48,9 @@ $ sudo gem install rubyzip -i /Library/Ruby/Gems/1.8
 
 <h4>RVM - Ruby 1.8.7</h4>
 ```
+$ gem install rails
 $ gem install builder
-$ gem install savon
+$ gem install savon --version 0.9.7
 $ gem install rubyzip
 ```
 <p>Your TextMate PATH shell variable should be enabled and should look something like this:</p>
@@ -67,19 +65,20 @@ $ gem install rubyzip
 
 <h4>RVM - Ruby 1.9+</h4>
 ```
+$ gem install rails
 $ gem install builder
-$ gem install savon
+$ gem install savon --version 0.9.7
 $ gem install rubyzip
 ```
 <p>Your TextMate PATH shell variable should be enabled and should look something like this:</p>
 ```
-/Users/your_username/.rvm/rubies/ruby-1.9.3-p0/bin:/usr/bin:/usr/sbin
+/Users/your_username/.rvm/rubies/ruby-1.9.2-p290/bin:/usr/bin:/usr/sbin
 ```
 <p>Create a TextMate shell variable named GEM_PATH with the value:</p>
 ```
-/Users/your_username/.rvm/gems/ruby-1.9.3-p0/
+/Users/your_username/.rvm/gems/ruby-1.9.2-p290/
 ```
-<p>TextMate is not equipped to run Ruby 1.9+ out of box, so if you're committed to using Ruby 1.9+, you'll need to make a slight modification to TextMate's plist.bundle:</p>
+<p>TextMate is not equipped to run Ruby 1.9 out of box, so if you're committed to using Ruby 1.9, you'll need to make a slight modification to TextMate's plist.bundle:</p>
 ```
 $ git clone git://github.com/kballard/osx-plist.git
 $ cd osx-plist/ext/plist
@@ -88,7 +87,7 @@ $ cp plist.bundle /Applications/TextMate.app/Contents/SharedSupport/Support/lib/
 ```
 
 <h3>IMPORTANT</h3>
-<P>If you get a ruby "constantize" exception when running a MavensMate command, it's likely a gem dependency issue. Ensure you've installed builder, savon, and rubyzip.</P>
+<P>If you get a ruby "constantize" exception when running a MavensMate command, it's likely a gem dependency issue. Ensure you've installed rails, builder, savon, and rubyzip.</P>
 
 <h2>Update</h2>
 <p></p>
