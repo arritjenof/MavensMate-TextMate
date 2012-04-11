@@ -64,7 +64,7 @@ Create a TextMate shell variable named GEM_PATH with the value:
 ####RVM - Ruby 1.9+
 ```
 $ gem install builder
-$ gem install savon --version 0.9.7
+$ gem install savon
 $ gem install rubyzip
 ```
 
@@ -74,9 +74,9 @@ Your TextMate PATH shell variable should be enabled and should look something li
 
 Create a TextMate shell variable named GEM_PATH with the value:
 
-	/Users/your_username/.rvm/gems/ruby-1.9.2-p290/
+	/Users/your_username/.rvm/gems/ruby-1.9.3-p0/
 
-TextMate is not equipped to run Ruby 1.9 out of box, so if you're committed to using Ruby 1.9, you'll need to make a slight modification to TextMate's plist.bundle:
+TextMate is not equipped to run Ruby 1.9.x out of box, so if you're committed to using Ruby 1.9.x, you'll need to make a slight modification to TextMate's plist.bundle:
 
 ```
 $ git clone git://github.com/kballard/osx-plist.git
@@ -127,18 +127,19 @@ We recommend the following to augment MavensMate:
 
 <a href="http://vimeo.com/mavens/review/33363307/c072a3df51">http://vimeo.com/mavens/review/33363307/c072a3df51</a>
 
+##Screenshots
 
-##Project Wizard
+###Project Wizard
 <img src="http://wearemavens.com/images/mm/project_wizard.png"/>
-##Metadata Creation
+###Metadata Creation
 <img src="http://wearemavens.com/images/mm/metadata.png"/>
-##Apex Test Runner
+###Apex Test Runner
 <img src="http://wearemavens.com/images/mm/test2.png"/>
-##Deployment Connections
+###Deployment Connections
 <img src="http://wearemavens.com/images/mm/deployment_connections.png"/>
-##Changesets (alpha)
+###Changesets (alpha)
 <img src="http://wearemavens.com/images/mm/changesets.png"/>
-##Code Completion (alpha)
+###Code Completion (alpha)
 <img src="http://wearemavens.com/images/mm/completion2.png"/>
-##Options Dialog
+###Options Dialog
 <img src="http://wearemavens.com/images/mm/options.png"/>
