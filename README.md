@@ -8,7 +8,8 @@ MavensMate is a TextMate bundle that aims to replicate the functionality of the 
 * Compile and retrieve other Salesforce.com metadata
 * Run Apex test methods and visualize test successes/failures & coverage
 * Setup deployment connections & deploy Salesforce.com metadata to orgs
-* Create "changesets" for easy deployment (alpha)
+* Create "changesets" for easy deployment
+* Headless Selenium testing via RSpec/Capybara
 * Supports code completion for SObject fields & Apex primitive methods (alpha)
  
 ##Clean Install
@@ -18,6 +19,15 @@ MavensMate is a TextMate bundle that aims to replicate the functionality of the 
 $ sudo gem install builder
 $ sudo gem install savon
 $ sudo gem install rubyzip
+```
+
+Too take advantage of headless Selenium tests:
+
+```
+$ sudo gem install rspec
+$ sudo gem install capybara
+$ sudo gem install selenium-webdriver
+$ sudo gem install libwebsocket
 ```
 
 ```
@@ -109,7 +119,15 @@ Compile current metadata:
 
 Deploy to server:
 
-	Control + Option + Command + D		
+	Control + Option + Command + D	
+
+Run RSpec Selenium test:
+
+	Control + Option + Command + T
+
+Run all RSpec Selenium tests in file:
+
+	Control + Option + Command + Y
 
 Code Completion (alpha):
 
