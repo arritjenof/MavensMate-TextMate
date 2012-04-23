@@ -21,7 +21,7 @@ $ sudo gem install savon
 $ sudo gem install rubyzip
 ```
 
-Too take advantage of headless Selenium tests:
+To take advantage of headless Selenium tests:
 
 ```
 $ sudo gem install rspec
