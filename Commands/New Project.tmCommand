@@ -6,6 +6,7 @@
 	<string>nop</string>
 	<key>command</key>
 	<string>#!/usr/bin/env ruby -W0
+#ENV['GEM_PATH'] = ENV['TM_BUNDLE_SUPPORT'] + '/vendor/'
 require 'rubygems'
 require 'savon'
 require 'builder'
