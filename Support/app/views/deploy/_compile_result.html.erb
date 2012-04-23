@@ -13,7 +13,7 @@
 	}
    
 </style>
-<div id="result" style="padding:5px 10px;">   
+<div id="result" style="padding:5px 10px;display:block">   
 	<% if ! result[:is_success] %>
 		<div id="error_message" class="alert-message error" style="margin-bottom: 10px;">
 			<p><strong>Compile Failed!</strong></p>
@@ -173,7 +173,9 @@ $(function() {
 	
 	$(window).resize(function() {
         $("#result_table_wrapper").height($(window).height() - 175)
-    });
+    }); 
+
+	//$("#result").fadeIn('fast');
 })
 
 </script>
