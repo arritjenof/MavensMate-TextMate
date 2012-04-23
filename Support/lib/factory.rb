@@ -41,25 +41,41 @@ module MavensMate
         File.open("#{ENV['TM_PROJECT_DIRECTORY']}/src/package.xml", 'w') {|f| f.write(project_package.to_xml) }
       end
       
-      def update_org_index(type, name)
-        begin
-          if File.exists("#{ENV['TM_PROJECT_DIRECTORY']}/config/.org_metadata")
-            project_array = eval(File.read("#{ENV['TM_PROJECT_DIRECTORY']}/config/.org_metadata"))
-            metadata_type = project_array.detect {|f| f[:title] == type }
-            metadata_type[:children].push({
-              :title=>name, 
-              :key=>name, 
-              :isLazy=>false, 
-              :isFolder=>false, 
-              :children=>[], 
-              :selected=>false
-            }) 
-          end 
-        rescue Exception => e
-          
-        end 
+      #puts spec
+      def put_spec_tests(project_name, server_url, is_sandbox)
+        Dir.mkdir("#{MavensMate.get_project_folder}#{project_name}/spec/")
+        login_url = (is_sandbox) ? "https://test.salesforce.com" : "https://login.salesforce.com"
+        subdomain = server_url.match(/\/\/(.*?)-/)[1]        
+        file_name = "spec_helper.rb"
+        project_directory = "#{MavensMate.get_project_folder}#{project_name}"
+        template = ERB.new File.new("#{ENV['TM_BUNDLE_SUPPORT']}/templates/spec_helper.erb").read, nil, "-"
+        erb = template.result(binding)        
+        src = File.new("#{MavensMate.get_project_folder}#{project_name}/spec/#{file_name}", "w")
+        src.puts(erb)
+        src.close
+        
+        Dir.foreach("#{MavensMate.get_project_folder}#{project_name}/src/pages") do |page|
+          next unless page.end_with?(".page")
+          page_name = page.split(".")[0]
+          file_name = "#{page_name}_spec.rb"
+          template = ERB.new File.new("#{ENV['TM_BUNDLE_SUPPORT']}/templates/spec_vf_page.erb").read, nil, "-"
+          erb = template.result(binding)        
+          src = File.new("#{MavensMate.get_project_folder}#{project_name}/spec/#{file_name}", "w")
+          src.puts(erb)
+          src.close
+        end  
       end
       
+      #puts single spec upon vf page creation
+      def put_spec_test(page_name)
+        file_name = "#{page_name}_spec.rb"
+        template = ERB.new File.new("#{ENV['TM_BUNDLE_SUPPORT']}/templates/spec_vf_page.erb").read, nil, "-"
+        erb = template.result(binding)        
+        src = File.new("#{MavensMate.get_project_folder}#{MavensMate.get_project_name}/spec/#{file_name}", "w")
+        src.puts(erb)
+        src.close  
+      end
+           
       #puts settings.yaml in the project config directory
       def put_project_config(username, project_name, server_url)
         project_folder = ENV['FM_PROJECT_FOLDER']

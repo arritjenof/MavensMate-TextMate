@@ -81,7 +81,11 @@ module MavensMate
           MavensMate::FileFactory.put_project_metadata(project_name, project_zip) #put the metadata in the project directory    
           add_to_keychain(project_name, pw)
           MavensMate::FileFactory.put_project_config(un, project_name, server_url)
-          FileUtils.rm_rf "#{tmp_dir}/mmpackage" 
+          FileUtils.rm_rf "#{tmp_dir}/mmpackage"
+          
+          #add spec here
+          is_sandbox = server_url.include? "test"
+          MavensMate::FileFactory.put_spec_tests(project_name, client.metadata_server_url, is_sandbox)
         }
         threads << Thread.new {
           #put object metadata 
@@ -111,35 +115,37 @@ module MavensMate
           			#STDOUT << htmlize(str, :no_newline_after_br => true)
         		end
         	end 
-        	TextMate.call_with_progress( :title => 'MavensMate', :message => 'Checking out from SVN Repository' ) do
+        	TextMate.call_with_progress( :title => 'MavensMate', :message => 'Checking out from SVN Repository...' ) do
         		Dir.chdir("#{project_folder}")	
         		TextMate::Process.run("svn checkout --force #{vc_url} '#{project_name}'", :interactive_input => false) do |str|
           			#STDOUT << htmlize(str, :no_newline_after_br => true)
         		end         
         	end
     	  elsif vc_type == "Git"
-    	    Dir.chdir("#{project_folder}#{project_name}")
-    	    #puts ">> git init"
-    	    TextMate::Process.run("git init", :interactive_input => false) do |str|
-        			#puts htmlize(str, :no_newline_after_br => true)
-      		end
-    	    #puts ">> git remote add #{vc_alias} #{vc_url}"
-    	    TextMate::Process.run("git remote add #{vc_alias} #{vc_url}", :interactive_input => false) do |str|
-        			#puts htmlize(str, :no_newline_after_br => true)
-      		end
-    	    #puts ">> git add ."
-    	    TextMate::Process.run("git add .", :interactive_input => false) do |str|
-        			#puts htmlize(str, :no_newline_after_br => true)
-      		end
-    	    #puts ">> git commit -m \"First import\""
-      		TextMate::Process.run("git commit -m \"First import\"", :interactive_input => false) do |str|
-        			#puts htmlize(str, :no_newline_after_br => true)
-      		end                                        
-      		vc_branch = "HEAD:#{vc_branch}" if vc_branch != "master" 
-    	    #puts ">> git push #{vc_alias} #{vc_branch}"
-    	    TextMate::Process.run("git push #{vc_alias} #{vc_branch}", :interactive_input => false) do |str|
-        			#puts htmlize(str, :no_newline_after_br => true)
-      		end
+        	TextMate.call_with_progress( :title => 'MavensMate', :message => 'Doing the Git dance...' ) do
+      	    Dir.chdir("#{project_folder}#{project_name}")
+      	    #puts ">> git init"
+      	    TextMate::Process.run("git init", :interactive_input => false) do |str|
+          			#puts htmlize(str, :no_newline_after_br => true)
+        		end
+      	    #puts ">> git remote add #{vc_alias} #{vc_url}"
+      	    TextMate::Process.run("git remote add #{vc_alias} #{vc_url}", :interactive_input => false) do |str|
+          			#puts htmlize(str, :no_newline_after_br => true)
+        		end
+      	    #puts ">> git add ."
+      	    TextMate::Process.run("git add .", :interactive_input => false) do |str|
+          			#puts htmlize(str, :no_newline_after_br => true)
+        		end
+      	    #puts ">> git commit -m \"First import\""
+        		TextMate::Process.run("git commit -m \"First import\"", :interactive_input => false) do |str|
+          			#puts htmlize(str, :no_newline_after_br => true)
+        		end                                        
+        		vc_branch = "HEAD:#{vc_branch}" if vc_branch != "master" 
+      	    #puts ">> git push #{vc_alias} #{vc_branch}"
+      	    TextMate::Process.run("git push #{vc_alias} #{vc_branch}", :interactive_input => false) do |str|
+          			#puts htmlize(str, :no_newline_after_br => true)
+        		end 
+    		  end
     	  end
     	  open_project(project_name)
         TextMate.go_to :file => "#{project_folder}#{project_name}/src/package.xml"
@@ -257,8 +263,9 @@ module MavensMate
           return result
         else
           zip_file = MavensMate::FileFactory.put_local_metadata(:api_name => options[:api_name], :meta_type => options[:meta_type], :object_name => object_name, :apex_class_type => options[:apex_class_type])
-          FileFactory.update_package_xml   
-          TextMate.rescan_project 
+          FileFactory.update_package_xml
+          MavensMate::FileFactory.put_spec_test(options[:api_name])           
+          TextMate.rescan_project
           TextMate.go_to :file => ENV['TM_PROJECT_DIRECTORY'] + "/src/#{META_DIR_MAP[options[:meta_type]]}/#{options[:api_name]}#{META_EXT_MAP[options[:meta_type]]}" 
           return result
         end
@@ -712,6 +719,12 @@ module MavensMate
     %x{security add-generic-password -a '#{project_name}-mm' -s \"MavensMate: #{project_name}\" -w #{pw} -U}
   end
   
+  #returns the selected location of projects
+  def self.get_project_folder
+    project_folder = ENV['FM_PROJECT_FOLDER']
+  	project_folder +='/' unless project_folder.end_with?("/")
+  end
+  
   private
     
     #returns a list of apex methods based on the object and method type supplied    
@@ -846,13 +859,7 @@ module MavensMate
       Dir.chdir("#{project_folder}")
       %x{find . -type d -name '#{project_name}' -exec mate {} \\;}
     end
-    
-    #returns the selected location of projects
-    def self.get_project_folder
-      project_folder = ENV['FM_PROJECT_FOLDER']
-    	project_folder +='/' unless project_folder.end_with?("/")
-    end
-    
+        
     #pings google.com to determine whether there's an active internet connection
     def self.has_internet
       require 'socket' 

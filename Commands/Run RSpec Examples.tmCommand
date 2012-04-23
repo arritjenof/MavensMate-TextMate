@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby -W0
+require "#{ENV['TM_BUNDLE_SUPPORT']}/lib/rspec.tmbundle/lib/rspec/mate"
+RSpec::Mate::Runner.new.run_file STDOUT   </string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>^~@y</string>
+	<key>name</key>
+	<string>Run RSpec Examples</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>uuid</key>
+	<string>CCBBF208-2BB2-44FD-824A-2CF597BAA139</string>
+</dict>
+</plist>
