@@ -1,5 +1,7 @@
 #MavensMate
 
+####If you're looking for the MavensMate Sublime Text plugin, you can find it here --> https://github.com/joeferraro/MavensMate-SublimeText 
+
 MavensMate is a TextMate bundle that aims to replicate the functionality of the Eclipse-based Force.com IDE.
 
 * Create & Edit Salesforce.com projects with specific package metadata
